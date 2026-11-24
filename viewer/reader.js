@@ -108,9 +108,11 @@ $("#filters").oninput = event => {
   if (["start","end"].includes(event.target.id)) markShortcut("");
   render();
 };
-fetch("/issues").then(response => {
+const embeddedIssue = document.getElementById("issue-data");
+const catalogue = embeddedIssue ? Promise.resolve().then(() => [JSON.parse(embeddedIssue.textContent)]) : fetch("/issues").then(response => {
   if (!response.ok) throw Error(); return response.json();
-}).then(data => {
+});
+catalogue.then(data => {
   issues = data;
   const dates = [];
   let total = 0;
@@ -122,6 +124,7 @@ fetch("/issues").then(response => {
     }
   }
   dates.sort();
+  if (embeddedIssue && issues.length === 1) $("#issue").value = issues[0].title;
   $("#coverage").textContent = "收录 "+total+" 篇"+(dates.length ? " | 抓取区间 "+dates[0]+" ～ "+dates.at(-1) : "");
   markShortcut("0"); render();
 }).catch(() => { $("#status").textContent = "读取失败，请刷新重试。"; });

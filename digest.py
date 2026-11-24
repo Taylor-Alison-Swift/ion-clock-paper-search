@@ -87,15 +87,34 @@ def markdown(issue, local=False):
     return "\n\n".join(blocks) + "\n"
 
 
+def reader_attachment(issue_json):
+    viewer = Path(__file__).resolve().parent / "viewer"
+    page = (viewer / "index.html").read_text(encoding="utf-8-sig")
+    css = (viewer / "reader.css").read_text(encoding="utf-8-sig")
+    script = (viewer / "reader.js").read_text(encoding="utf-8-sig")
+    page = page.replace('<link rel="stylesheet" href="/reader.css">', f"<style>{css}</style>")
+    page = page.replace('<script defer src="/reader.js"></script>', "")
+    # Escape HTML delimiters inside JSON before embedding publisher text.
+    data = issue_json.replace("<", "\\u003c")
+    return page.replace("</body>", f'<script type="application/json" id="issue-data">{data}</script>'
+                        f"<script>{script}</script></body>").encode("utf-8")
+
+
 def email_message(issue, folder, recipient, sender):
     message = EmailMessage()
     message["Subject"] = issue["title"]
     message["From"] = sender
     message["To"] = recipient
-    body = markdown(issue)
+    issue_json = json.dumps(issue, ensure_ascii=False, indent=2)
+    reader = reader_attachment(issue_json)
+    metadata = issue_json.encode("utf-8")
+    body = ("下载附件「当期文献阅读器.html」，用浏览器打开即可阅读。"
+            "归档到本地阅读器时，把 issue.json 放入对应的日报日期目录。\n\n" + markdown(issue))
     attachments = []
     # Reserve space for MIME/base64 overhead on a typical 25 MB SMTP server.
-    budget = 16 * 1024 * 1024
+    budget = 16 * 1024 * 1024 - len(reader) - len(metadata)
+    if budget < 0:
+        raise ValueError("阅读页与期次数据已超过单封邮件附件容量")
     for p in issue["papers"]:
         if p.get("pdf_file"):
             file = folder / p["pdf_file"]
@@ -122,6 +141,9 @@ def email_message(issue, folder, recipient, sender):
             parts.append(f"<p>{line}</p>")
     message.add_alternative('<html lang="zh-CN"><body>' + "".join(parts) + "</body></html>",
                             subtype="html")
+    message.add_attachment(reader, maintype="text", subtype="html", filename="当期文献阅读器.html",
+                           params={"charset": "utf-8"})
+    message.add_attachment(metadata, maintype="application", subtype="json", filename="issue.json")
     for file in attachments:
         message.add_attachment(file.read_bytes(), maintype="application", subtype="pdf",
                                filename=file.name)

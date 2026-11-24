@@ -12,7 +12,7 @@
 
 ## 邮件和微信同时推送
 
-**普通微信**使用 PushPlus 的微信公众号。发件人在 PushPlus 登录并获取 token，创建订阅组后分享订阅二维码，读者扫码关注并加入。GitHub Secrets 添加 `PUSHPLUS_TOKEN`，Variables 添加 `PUSHPLUS_TOPIC`（订阅组编码）和 `PUSH_CHANNELS=email,wechat`。留空订阅组时只发给 token 所属用户。每篇一条消息，附公开 PDF 链接；邮件继续附实际文件。PushPlus 返回受理状态，最终送达以微信通知或平台投递记录为准。[PushPlus 接口与订阅说明](https://www.pushplus.plus/doc/guide/api.html)
+**普通微信**使用 PushPlus 的微信公众号。发件人在 PushPlus 登录并获取 token，创建订阅组后分享订阅二维码，读者扫码关注并加入。GitHub Secrets 添加 `PUSHPLUS_TOKEN`，Variables 添加 `PUSHPLUS_TOPIC`（订阅组编码）和 `PUSH_CHANNELS=email,wechat`。留空订阅组时只发给 token 所属用户。每期合并为一条微信消息，按核心论文、可直接用于实验的方法、正式发表更新排列，附公开原文链接。全文超出 2 万字时发送同序论文目录；邮件继续附实际文件。PushPlus 返回受理状态，最终送达以微信通知或平台投递记录为准。[PushPlus 接口与订阅说明](https://www.pushplus.plus/doc/guide/api.html)
 
 **企业微信群**可在目标群添加群机器人，将 Webhook 存入 Secrets 的 `WECOM_WEBHOOK`，并设置 `PUSH_CHANNELS=email,wecom`。本地运行时使用同名环境变量。两条微信渠道也可以同时启用。
 

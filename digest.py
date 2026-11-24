@@ -182,7 +182,28 @@ def deliver_once(db, identity, send):
     return True
 
 
-def wechat_posts(issue):
+def pushplus_report(issue):
+    body = markdown(issue)
+    if len(body) <= 20000:
+        return body
+    # Keep every paper and its public link within the standard account limit.
+    blocks = ["本期篇幅较长，以下按栏目列出全部论文和原文链接。"]
+    if issue.get("note"):
+        blocks.append(issue["note"])
+    for section, label in SECTIONS.items():
+        papers = [p for p in issue["papers"] if p["section"] == section]
+        if papers:
+            blocks.append(f"## {label} · {len(papers)} 篇")
+        for p in papers:
+            url = p.get("pdf_url") or p["doi"]
+            blocks.append(f"- [{p['title']}]({url})")
+    body = "\n\n".join(blocks)
+    if len(body) > 20000:
+        raise ValueError("本期论文目录超过 PushPlus 普通账户单条消息的 2 万字上限")
+    return body
+
+
+def wecom_posts(issue):
     for p in issue["papers"]:
         title = f"{issue['title']}｜{SECTIONS[p['section']]}"
         body = [f"**{p['headline']}**", *paper_lines(p)]
@@ -248,14 +269,18 @@ def deliver(issue, folder, state):
                 deliver_once(db, [issue["title"], "feishu", hook, paper_id],
                              lambda: post_card(hook, card))
                 time.sleep(0.25)
-        for channel in sorted(channels & {"wechat", "wecom"}):
-            dest = os.environ["PUSHPLUS_TOKEN" if channel == "wechat" else "WECOM_WEBHOOK"]
-            topic = os.getenv("PUSHPLUS_TOPIC", "") if channel == "wechat" else ""
-            for key, title, body in wechat_posts(issue):
-                sent = deliver_once(db, [issue["title"], channel, dest, topic, key],
-                                    lambda: send_wechat(channel, dest, title, body))
+        if "wechat" in channels:
+            token = os.environ["PUSHPLUS_TOKEN"]
+            topic = os.getenv("PUSHPLUS_TOPIC", "")
+            deliver_once(db, [issue["title"], "wechat", token, topic, "issue"],
+                         lambda: send_wechat("wechat", token, issue["title"], pushplus_report(issue)))
+        if "wecom" in channels:
+            dest = os.environ["WECOM_WEBHOOK"]
+            for key, title, body in wecom_posts(issue):
+                sent = deliver_once(db, [issue["title"], "wecom", dest, "", key],
+                                    lambda: send_wechat("wecom", dest, title, body))
                 if sent:
-                    time.sleep(3.1 if channel == "wecom" else 13)
+                    time.sleep(3.1)
     finally:
         db.close()
 

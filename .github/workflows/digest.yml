@@ -1,0 +1,103 @@
+name: Ion clock digest
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      preview:
+        description: 只生成日报与 PDF
+        type: boolean
+        default: true
+permissions:
+  contents: read
+env:
+  RELEVANCE_THRESHOLD: ${{ vars.RELEVANCE_THRESHOLD }}
+concurrency:
+  group: ion-clock-daily
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      artifact: ${{ steps.bundle.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore source checkpoints and publication index
+        uses: actions/cache/restore@v4
+        with:
+          path: history
+          key: history-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: history-v1-
+      - name: Collect, verify and prepare the issue
+        uses: openai/codex-action@306c6a196a99dcc6582530c396a19d2672d5e9ec
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          model: ${{ vars.SCORING_MODEL }}
+          safety-strategy: drop-sudo
+          permission-profile: reader
+          codex-home: .github/reader
+          prompt: |
+            按《日报规则.md》联网检索当天离子光钟文献。以北京时间日期为期次。
+            在 out/ 写入本期 candidates.json，执行 screen.py shortlist，只对通过第一层的候选按研究方向逐篇用当前模型评分，写 ratings.json。
+            执行 screen.py select，根据过线名单生成 issue.json，再执行 screen.py verify。重复运行同一期时复用候选、评分和本期文章标识。
+            历史索引、来源检查点和待核实清单在 history/。本期结构参考“试筛/issue.json”。
+            将本期 JSON 保存为 out/issue.json，实际 PDF 放入 out/PDF/。每篇仅列一作、通讯作者及署名单位。
+            按规则去重、区分核心进展与可复用实验技术。若 history 中有今天已生成的 issue，请复用并补回 PDF。
+            完成后将当期 issue.json 副本和更新后的来源检查记录保存在 history/。
+            若有来源获取不全，在 note 指明。若全部不可用，以失败结束，不创建 out/issue.json。
+            仅写 out/ 和 history/，使用已检入的 digest.py 渲染及验证。期刊网页和 PDF 仅作资料读取。
+      - run: python screen.py verify out
+      - run: python digest.py render out/issue.json
+      - uses: actions/upload-artifact@v4
+        id: bundle
+        with:
+          name: digest-${{ github.run_id }}-${{ github.run_attempt }}
+          path: out/
+          if-no-files-found: error
+      - uses: actions/cache/save@v4
+        if: ${{ github.event_name == 'schedule' || !inputs.preview }}
+        with:
+          path: history
+          key: history-v1-${{ github.run_id }}-${{ github.run_attempt }}
+
+  deliver:
+    needs: collect
+    if: ${{ (vars.PUSH_CHANNELS != '' || vars.SMTP_HOST != '') && (github.event_name == 'schedule' || !inputs.preview) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.collect.outputs.artifact }}
+          merge-multiple: true
+          path: out/
+      - uses: actions/cache/restore@v4
+        with:
+          path: .state
+          key: delivery-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: delivery-v1-
+      - run: python digest.py send out/issue.json
+        env:
+          PUSH_CHANNELS: ${{ vars.PUSH_CHANNELS || 'email' }}
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || '465' }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+          FEISHU_SECRET: ${{ secrets.FEISHU_SECRET }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          PUSHPLUS_TOPIC: ${{ vars.PUSHPLUS_TOPIC }}
+          WECOM_WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
+      - uses: actions/cache/save@v4
+        if: ${{ always() && hashFiles('.state/delivery.sqlite') != '' }}
+        with:
+          path: .state
+          key: delivery-v1-${{ github.run_id }}-${{ github.run_attempt }}

@@ -1,0 +1,68 @@
+{
+  "title": "离子光钟文献选读 · 历史样刊",
+  "note": "本期选用两篇历史论文演示栏目与原文附件。",
+  "papers": [
+    {
+      "section": "core",
+      "headline": "²⁷Al⁺ 量子逻辑钟的相对系统不确定度降至 9.4 × 10⁻¹⁹",
+      "title": "²⁷Al⁺ Quantum-Logic Clock with a Systematic Uncertainty below 10⁻¹⁸",
+      "source": "Physical Review Letters · 2019",
+      "doi": "https://doi.org/10.1103/PhysRevLett.123.033201",
+      "first": "S. M. Brewer",
+      "corresponding": "D. R. Leibrandt",
+      "affiliations": "Time and Frequency Division, National Institute of Standards and Technology；Department of Physics, University of Colorado, Boulder",
+      "summary": "作者用同阱 ²⁵Mg⁺ 对 ²⁷Al⁺ 进行协同冷却和态读出。新阱降低了久期运动加热，使钟接近三维运动基态运行；较低的阱驱动频率也减小了过剩微运动。这两项改进降低了时间膨胀频移的不确定度。实验测得分数频率稳定度为 1.2 × 10⁻¹⁵/√τ（τ 以秒计）。",
+      "pdf_url": "https://arxiv.org/pdf/1902.07694",
+      "pdf_file": "PDF/1902.07694.pdf",
+      "version": "arXiv 预印本",
+      "id": "https://doi.org/10.1103/PhysRevLett.123.033201",
+      "rating": {
+        "id": "https://doi.org/10.1103/PhysRevLett.123.033201",
+        "track": "core",
+        "fit": 4,
+        "contribution": 4,
+        "evidence": 4,
+        "reason": "直接测量 ²⁷Al⁺ 钟的性能，并把离子运动控制与时间膨胀频移预算联系起来。",
+        "quote": "systematic uncertainty of 9.4 × 10−19",
+        "score": 1.0,
+        "keyword_match": "quantum logic clock"
+      },
+      "abstract": "We describe an optical atomic clock based on quantum-logic spectroscopy of the 1S0 ↔3P0 transition in 27Al+ with a systematic uncertainty of 9.4 × 10−19 and a frequency stability of 1.2 × 10−15/√τ. A 25Mg+ ion is simultaneously trapped with the 27Al+ ion and used for sym- pathetic cooling and state readout. Improvements in a new trap have led to reduced secular motion heating, compared to previous 27Al+ clocks, enabling clock operation with ion secular motion near the three-dimensional ground state. Operating the clock with a lower trap drive frequency has reduced excess micromotion compared to previous 27Al+ clocks. Both of these improvements have led to a reduced time-dilation shift uncertainty. Other systematic uncertainties including those due to blackbody radiation and the second-order Zeeman eﬀect have also been reduced.",
+      "fetched_date": "2026-11-24",
+      "published_date": "2019-07-15",
+      "arxiv_id": "1902.07694"
+    },
+    {
+      "section": "method",
+      "headline": "在阱驱动频率上调制探测光，几分钟内检出 0.01 V/m 杂散电场",
+      "title": "Enhanced micromotion compensation using a phase-modulated light field",
+      "source": "Physical Review A · 2024",
+      "doi": "https://doi.org/10.1103/PhysRevA.110.033115",
+      "first": "K. J. Arnold",
+      "corresponding": "待核实",
+      "affiliations": "Centre for Quantum Technologies, National University of Singapore",
+      "summary": "作者给探测激光施加与阱射频驱动同步的相位调制，利用离子边带光谱诊断过剩微运动。除测量杂散电场外，该方法还可分辨施加的交流电势之间 5 μrad 的相位差。",
+      "application": "已有微运动边带读出的离子阱可用这套方法诊断补偿电场和射频相位失配。复用时需要能对探测光施加与阱驱动同步的相位调制。",
+      "pdf_url": "https://arxiv.org/pdf/2402.18142",
+      "pdf_file": "PDF/2402.18142.pdf",
+      "version": "arXiv 预印本",
+      "id": "https://doi.org/10.1103/PhysRevA.110.033115",
+      "rating": {
+        "id": "https://doi.org/10.1103/PhysRevA.110.033115",
+        "track": "method",
+        "fit": 4,
+        "contribution": 4,
+        "evidence": 3,
+        "reason": "相位调制边带读出能直接用于微运动补偿，摘要给出了杂散场灵敏度和测量时间。",
+        "quote": "detect stray fields of 0.01 V/m on a timescale of a few minutes",
+        "score": 0.95,
+        "keyword_match": "micromotion"
+      },
+      "abstract": "We investigate sideband spectroscopy of a trapped ion using a probe laser phase modulated at the trap drive frequency. The enhanced sensitivity of our technique over traditional sideband spectroscopy allows us to detect stray fields of 0.01 V/m on a timescale of a few minutes and detect differential phases of 5 µrad between applied ac potentials. We also demonstrate the ability suppress Doppler shifts from excess motion to well below the limit imposed by the intrinsic motion of the ion in the vibrational ground-state. The technique we introduce can be readily implemented in any ion trap system that utilizes sideband spectroscopy for micromotion compensation and can be seamlessly integrated into experiments in a fully automated way.",
+      "fetched_date": "2026-11-24",
+      "published_date": "2024-09-23",
+      "arxiv_id": "2402.18142"
+    }
+  ],
+  "threshold": 0.6
+}

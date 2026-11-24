@@ -1,0 +1,27 @@
+﻿<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>离子光钟论文阅读器</title><link rel="stylesheet" href="/reader.css"><script defer src="/reader.js"></script>
+</head><body>
+<header><div class="brand"><i aria-hidden="true"></i><div><h1>离子光钟论文阅读器</h1><p id="coverage">正在读取文献…</p></div></div></header>
+<main><form id="filters">
+<div class="dates">
+<label>日期维度<select id="dimension"><option value="fetched_date">抓取日期</option><option value="published_date">发表日期</option></select></label>
+<label>开始日期<input type="date" id="start"></label><label>结束日期<input type="date" id="end"></label>
+<div><span class="label">快捷时间</span><div class="buttons" id="quick"><button type="button" data-days="1">今天</button><button type="button" data-days="3">过去 3 天</button><button type="button" data-days="7">过去 1 周</button><button type="button" data-days="0">全部</button></div></div>
+<div class="buttons actions"><button class="primary" type="submit">筛选</button><button type="reset">重置</button></div></div>
+<div class="secondary"><label>关键词<input id="query" type="search" placeholder="标题 / 作者 / 单位 / 摘要关键词"></label>
+<label>栏目<select id="section"><option value="">全部栏目</option><option value="core">核心论文</option><option value="method">可直接用于实验的方法</option><option value="update">正式发表更新</option></select></label>
+<label>期次<select id="issue"><option value="">全部期次</option></select></label>
+<div><span class="label">收藏筛选</span><label class="check"><input type="checkbox" id="saved">只看收藏</label></div></div>
+</form>
+<p id="status" aria-live="polite"></p><div id="notes"></div><section id="list" aria-label="论文列表"></section>
+<template id="paper"><article>
+<div class="card-head"><span class="identifier"></span><h2 lang="en"></h2><button class="save" type="button" aria-label="收藏论文"></button></div>
+<p class="dates-line"></p><p class="byline"></p><div class="tags"></div>
+<h3>署名单位</h3><p class="affiliation" lang="en"></p>
+<h3>中文摘要</h3><p class="summary"></p><p class="application"></p>
+<details class="abstract"><summary>查看 Abstract</summary><p lang="en"></p></details>
+<details class="rating"><summary></summary><p></p></details>
+<footer><strong>原文 PDF</strong><div class="links"></div></footer>
+</article></template></main></body></html>

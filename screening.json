@@ -1,0 +1,29 @@
+{
+  "threshold": 0.6,
+  "track_criteria": {
+    "core": "在原文中确认被研究的离子、钟跃迁或参加比对的离子钟。接受新的实测、计算或具体方案，包括候选钟种、频率比、频移与不确定度预算、利用离子钟的基础物理检验。说明测量、计算或改进了什么。",
+    "method": "指出可复用的实验环节、具体操作和支撑迁移的指标或适用条件。允许来自量子计算、中性原子或通用光学的工作，允许全文没有提到光钟。区分作者已验证的结果与预期的离子钟用途。",
+    "background": "仅在引言中提到光钟、仅共用离子或设备、仅例行执行补偿而未提供可复用结果时归入背景。",
+    "pending": "无法确认钟种、测量对象或迁移依据时补查全文，仍缺证据的保留待核实。"
+  },
+  "research_direction": "囚禁离子光钟与精密频率计量，包括候选钟跃迁、系统频移、频率比、钟网和实际离子钟性能。也收录可直接用于离子钟实验的测量、诊断、冷却、探测、阱驱动、激光与频率传递方法。重视具体可复用的步骤、实验条件或可核对的理论结果。",
+  "direct": [
+    "ion clock", "ion optical clock", "ion frequency standard", "ion optical frequency standard",
+    "quantum logic clock", "quantum logic spectroscopy", "optical clock", "clock transition",
+    "optical frequency standard", "optical frequency ratio", "micromotion", "sideband thermometry",
+    "electric octupole transition", "离子光钟", "微运动补偿"
+  ],
+  "platform": [
+    "trapped ion", "ion trap", "paul trap", "ion crystal", "single ion", "highly charged ion",
+    "al+", "yb+", "sr+", "ca+", "in+", "hg+", "ba+", "aluminum ion", "aluminium ion",
+    "ytterbium ion", "strontium ion", "calcium ion", "indium ion", "barium ion", "mercury ion"
+  ],
+  "measurement": [
+    "spectroscopy", "transition", "frequency", "quadrupole shift", "zeeman", "blackbody",
+    "stark shift", "time dilation", "polarizability", "cooling", "heating", "motion",
+    "electric field", "radio frequency", "rf amplitude", "readout", "state detection",
+    "state preparation", "thermometry", "probe", "magnetic field"
+  ],
+  "optics": ["cavity", "laser", "optical fiber", "optical fibre", "fiber link", "fibre link", "frequency comb"],
+  "metrology": ["phase noise", "acceleration sensitivity", "thermal noise", "transfer oscillator", "phase stabilization", "frequency transfer", "frequency ratio", "fractional frequency stability"]
+}

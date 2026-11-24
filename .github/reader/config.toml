@@ -1,0 +1,8 @@
+[permissions.reader]
+extends = ":workspace"
+
+[permissions.reader.network]
+enabled = true
+
+[permissions.reader.network.domains]
+"*" = "allow"

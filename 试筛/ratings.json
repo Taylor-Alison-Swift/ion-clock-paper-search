@@ -1,0 +1,20 @@
+[
+  {
+    "id": "https://doi.org/10.1103/PhysRevLett.123.033201",
+    "track": "core",
+    "fit": 4,
+    "contribution": 4,
+    "evidence": 4,
+    "reason": "直接测量 ²⁷Al⁺ 钟的性能，并把离子运动控制与时间膨胀频移预算联系起来。",
+    "quote": "systematic uncertainty of 9.4 × 10−19"
+  },
+  {
+    "id": "https://doi.org/10.1103/PhysRevA.110.033115",
+    "track": "method",
+    "fit": 4,
+    "contribution": 4,
+    "evidence": 3,
+    "reason": "相位调制边带读出能直接用于微运动补偿，摘要给出了杂散场灵敏度和测量时间。",
+    "quote": "detect stray fields of 0.01 V/m on a timescale of a few minutes"
+  }
+]

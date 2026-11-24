@@ -176,9 +176,10 @@ def deliver_once(db, identity, send):
     with db:
         db.execute("BEGIN IMMEDIATE")
         if db.execute("SELECT 1 FROM sent WHERE id=?", (key,)).fetchone():
-            return
+            return False
         send()
         db.execute("INSERT INTO sent VALUES (?)", (key,))
+    return True
 
 
 def wechat_posts(issue):
@@ -215,9 +216,14 @@ def send_wechat(channel, destination, title, body):
     req = Request(url, data=json.dumps(payload, ensure_ascii=False).encode(),
                   headers={"Content-Type": "application/json"})
     with urlopen(req, timeout=30) as response:
-        status = json.load(response).get(status_key)
+        result = json.load(response)
+    status = result.get(status_key)
     if status != success:
-        raise RuntimeError(f"{channel} 接口未接受推送，状态码 {status}")
+        detail = str(result.get("msg") or result.get("errmsg") or "平台未提供详情")
+        if destination:
+            detail = detail.replace(destination, "[已隐藏]")
+        detail = " ".join(detail.split())[:300]
+        raise RuntimeError(f"{channel} 接口未接受推送，状态码 {status}，{detail}")
 
 
 def deliver(issue, folder, state):
@@ -246,9 +252,10 @@ def deliver(issue, folder, state):
             dest = os.environ["PUSHPLUS_TOKEN" if channel == "wechat" else "WECOM_WEBHOOK"]
             topic = os.getenv("PUSHPLUS_TOPIC", "") if channel == "wechat" else ""
             for key, title, body in wechat_posts(issue):
-                deliver_once(db, [issue["title"], channel, dest, topic, key],
-                             lambda: send_wechat(channel, dest, title, body))
-                time.sleep(3.1 if channel == "wecom" else 1)
+                sent = deliver_once(db, [issue["title"], channel, dest, topic, key],
+                                    lambda: send_wechat(channel, dest, title, body))
+                if sent:
+                    time.sleep(3.1 if channel == "wecom" else 13)
     finally:
         db.close()
 

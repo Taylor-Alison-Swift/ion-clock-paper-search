@@ -109,7 +109,7 @@ def email_message(issue, folder, recipient, sender):
     reader = reader_attachment(issue_json)
     metadata = issue_json.encode("utf-8")
     body = ("下载附件「当期文献阅读器.html」，用浏览器打开即可阅读。"
-            "归档到本地阅读器时，把 issue.json 放入对应的日报日期目录。\n\n" + markdown(issue))
+            "归档到本地阅读器时，点击「导入邮件日报」，选择 issue.json，也可以同时选择本期 PDF。\n\n" + markdown(issue))
     attachments = []
     # Reserve space for MIME/base64 overhead on a typical 25 MB SMTP server.
     budget = 16 * 1024 * 1024 - len(reader) - len(metadata)

@@ -4,11 +4,13 @@
 
 在项目目录运行 `python viewer.py`，打开 [本机阅读室](http://127.0.0.1:8776)。可按期次、栏目、作者、单位和摘要检索，收藏保存在当前浏览器，原文优先打开本地 PDF。页面自动读取“试筛”、“日报/日期”和“out”中的 issue.json，刷新即可看新内容。从 GitHub Actions 下载的每期产物可解压到“日报/YYYY-MM-DD/”，保持 PDF 子目录。端口可通过 `--port 7770` 更换。
 
+打开本机阅读室，点击“导入邮件日报”，可一次选择多份邮件的 issue.json。要归档附件 PDF，请一次选择一份 issue.json 和该期原文件名的 PDF。默认显示全部期次；同日按 DOI、arXiv ID 或英文原题去重，导入后仍可浏览以前的日期。邮件 HTML 是当期快照。
+
 ## 两层筛选
 
 在 [筛选配置](screening.json) 编辑研究方向、关键词和默认阈值 0.60。关键词层在标题与摘要中筛掉明显无关文章；第二层由当前 GPT 逐篇评估方向契合度（50%）、具体贡献（30%）和原文支撑（20%）。归一化分数达到阈值且有原文依据才入选，刊名和作者不加分。网页可展开查看理由与引句。[逐档标准与运行顺序](日报规则.md)
 
-本地定时任务使用当前 Codex 中的 GPT；云端使用 Codex Action 的 OpenAI API 密钥。GitHub Actions Variables 中可设置 `SCORING_MODEL` 选择该 API 支持的 GPT 模型，此模型也负责当期检索整理；`RELEVANCE_THRESHOLD` 可覆盖阈值。
+日常采集、筛选与推送由 GitHub Actions 完成，本机负责归档和阅读。GitHub Actions Variables 中可设置 `SCORING_MODEL` 选择该 API 支持的 GPT 模型，此模型也负责当期检索整理；`RELEVANCE_THRESHOLD` 可覆盖阈值。
 
 ## 邮件和微信同时推送
 

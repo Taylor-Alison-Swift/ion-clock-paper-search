@@ -109,11 +109,15 @@ $("#filters").oninput = event => {
   render();
 };
 const embeddedIssue = document.getElementById("issue-data");
-const catalogue = embeddedIssue ? Promise.resolve().then(() => [JSON.parse(embeddedIssue.textContent)]) : fetch("/issues").then(response => {
-  if (!response.ok) throw Error(); return response.json();
-});
-catalogue.then(data => {
-  issues = data;
+async function refreshLibrary() {
+  if (embeddedIssue) {
+    issues = [JSON.parse(embeddedIssue.textContent)];
+  } else {
+    const response = await fetch("/issues");
+    if (!response.ok) throw Error();
+    issues = await response.json();
+  }
+  $("#issue").options.length = 1;
   const dates = [];
   let total = 0;
   for (const issue of issues) {
@@ -127,4 +131,46 @@ catalogue.then(data => {
   if (embeddedIssue && issues.length === 1) $("#issue").value = issues[0].title;
   $("#coverage").textContent = "收录 "+total+" 篇"+(dates.length ? " | 抓取区间 "+dates[0]+" ～ "+dates.at(-1) : "");
   markShortcut("0"); render();
-}).catch(() => { $("#status").textContent = "读取失败，请刷新重试。"; });
+}
+$("#archive-link").hidden = !embeddedIssue;
+$("#import-button").hidden = Boolean(embeddedIssue);
+$("#import-button").onclick = () => $("#import-files").click();
+$("#import-files").onchange = async event => {
+  let imported = 0;
+  const failed = [];
+  const files = [...event.target.files];
+  const jsonFiles = files.filter(f => /\.json$/i.test(f.name));
+  const pdfs = files.filter(f => /\.pdf$/i.test(f.name));
+  if (!jsonFiles.length || (pdfs.length && jsonFiles.length !== 1)) {
+    $("#import-status").textContent = "请选择邮件里的 issue.json；同时导入 PDF 时，请每次选择一期。";
+    event.target.value = ""; return;
+  }
+  for (const file of jsonFiles) {
+    try {
+      let body = file;
+      if (pdfs.length) {
+        const issue = JSON.parse(await file.text());
+        const encoded = {};
+        for (const pdf of pdfs) {
+          const url = await new Promise((resolve,reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result); reader.onerror = reject;
+            reader.readAsDataURL(pdf);
+          });
+          encoded[pdf.name] = url.split(",")[1];
+        }
+        body = JSON.stringify({issue,pdfs:encoded});
+      }
+      const response = await fetch("/import", {method:"POST", headers:{"Content-Type":"application/json"}, body});
+      if (!response.ok) throw Error();
+      imported++;
+    } catch { failed.push(file.name); }
+  }
+  event.target.value = "";
+  $("#import-status").textContent = "已归档 "+imported+" 份"+(failed.length ? "，导入失败："+failed.join("、") : "。");
+  if (imported) {
+    $("#filters").reset();
+    await refreshLibrary();
+  }
+};
+refreshLibrary().catch(() => { $("#status").textContent = "读取失败，请刷新重试。"; });

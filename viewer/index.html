@@ -15,6 +15,7 @@
 <label>期次<select id="issue"><option value="">全部期次</option></select></label>
 <div><span class="label">收藏筛选</span><label class="check"><input type="checkbox" id="saved">只看收藏</label></div></div>
 </form>
+<div class="archive-actions"><button id="import-button" type="button" hidden>导入邮件日报</button><input hidden type="file" id="import-files" accept=".json,.pdf" multiple><a id="archive-link" href="http://127.0.0.1:8776/" hidden>打开本机全部期次</a><span id="import-status" role="status"></span></div>
 <p id="status" aria-live="polite"></p><div id="notes"></div><section id="list" aria-label="论文列表"></section>
 <template id="paper"><article>
 <div class="card-head"><span class="identifier"></span><h2 lang="en"></h2><button class="save" type="button" aria-label="收藏论文"></button></div>

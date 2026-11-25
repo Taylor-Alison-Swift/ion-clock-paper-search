@@ -2,6 +2,7 @@ name: Ion clock digest
 on:
   schedule:
     - cron: '0 1 * * *'
+    - cron: '20 1 * * *'
   workflow_dispatch:
     inputs:
       preview:
@@ -17,7 +18,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      day: ${{ steps.date.outputs.day }}
+      delivered: ${{ steps.receipt.outputs.cache-hit }}
+    steps:
+      - id: date
+        run: echo "day=$(TZ=Asia/Shanghai date +%F)" >> "$GITHUB_OUTPUT"
+      - id: receipt
+        if: github.event_name == 'schedule'
+        uses: actions/cache/restore@v4
+        with:
+          path: .daily-receipt
+          key: sent-v1-${{ steps.date.outputs.day }}
+          lookup-only: true
+
   collect:
+    needs: check
+    if: needs.check.outputs.delivered != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     outputs:
@@ -66,7 +85,7 @@ jobs:
           key: history-v1-${{ github.run_id }}-${{ github.run_attempt }}
 
   deliver:
-    needs: collect
+    needs: [check, collect]
     if: ${{ (vars.PUSH_CHANNELS != '' || vars.SMTP_HOST != '') && (github.event_name == 'schedule' || !inputs.preview) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -102,3 +121,9 @@ jobs:
         with:
           path: .state
           key: delivery-v1-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Mark daily delivery complete
+        run: touch .daily-receipt
+      - uses: actions/cache/save@v4
+        with:
+          path: .daily-receipt
+          key: sent-v1-${{ needs.check.outputs.day }}

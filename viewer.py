@@ -73,13 +73,17 @@ def catalogue():
     files = sorted((ROOT / "日报" / "邮件导入").glob("*/*/issue.json")) + files
     files.extend([ROOT / "out" / "issue.json", ROOT / "试筛" / "issue.json"])
     groups, pdfs, aliases = {}, {}, {}
+    editions = []
+    entries = []
     for path in files:
         if not path.is_file():
             continue
         issue = json.loads(path.read_text(encoding="utf-8-sig"))
         day = issue_day(issue, path.parent.name) or path.parent.name
+        editions.append((day, path, issue))
+    # Prefer the first dated issue; sample issues sort after daily issues.
+    for day, path, issue in sorted(editions, key=lambda item: item[0]):
         group = groups.setdefault(day, {**issue, "papers": [], "date": day})
-        index = aliases.setdefault(day, {})
         for p in issue["papers"]:
             p.pop("local_pdf", None)
             if p.get("pdf_file"):
@@ -89,16 +93,30 @@ def catalogue():
                     pdfs["/pdf/" + token] = f
                     p["local_pdf"] = "/pdf/" + token
             keys = paper_keys(p)
-            existing = next((index[key] for key in keys if key in index), None)
-            if existing is None:
-                group["papers"].append(p)
-                existing = p
+            matches = sorted({aliases[key] for key in keys if key in aliases})
+            if not matches:
+                idx = len(entries)
+                entries.append((group, p, keys))
             else:
-                for key, value in p.items():
-                    if value and not existing.get(key):
-                        existing[key] = value
+                idx = matches[0]
+                _, existing, all_keys = entries[idx]
+                others = []
+                for other_idx in matches[1:]:
+                    _, other, other_keys = entries[other_idx]
+                    others.append(other)
+                    keys.update(other_keys)
+                    entries[other_idx] = None
+                for other in [*others, p]:
+                    for field, value in other.items():
+                        if value and (not existing.get(field) or existing[field] == "待核实"):
+                            existing[field] = value
+                all_keys.update(keys)
             for key in keys:
-                index[key] = existing
+                aliases[key] = idx
+    for entry in entries:
+        if entry is not None:
+            group, paper, _ = entry
+            group["papers"].append(paper)
     return sorted(groups.values(), key=lambda i: (bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", i["date"])), i["date"]), reverse=True), pdfs
 
 
